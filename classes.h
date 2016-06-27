@@ -1,6 +1,5 @@
 #ifndef CLASSES_H_INCLUDED
 #define CLASSES_H_INCLUDED
-
 #endif // CLASSES_H_INCLUDED
 
 #define _UP    1
@@ -13,15 +12,16 @@
 #define SCREEN_MAX_X 500
 #define SCREEN_MAX_Y 500
 
-class makeThings {
+#define MIN_PIECES 20
+#define MAX_PIECES 35
+
+class mazePiece {
 private:
   unsigned int x1Pos, y1Pos;
   unsigned int x2Pos, y2Pos;
   int direction;
 public:
-
-  makeThings(int x1, int y1, int x2, int y2, int dir);
-  //~makeThings();
+  mazePiece(int x1, int y1, int x2, int y2, int dir);
   int getX1Pos() { return x1Pos; }
   int getY1Pos() { return y1Pos; }
   int getX2Pos() { return x2Pos; }
@@ -29,7 +29,7 @@ public:
   int getDirection() { return direction; }
 };
 
-makeThings::makeThings(int x1, int y1, int x2, int y2, int dir)
+mazePiece::mazePiece(int x1, int y1, int x2, int y2, int dir)
 {
   x1Pos = x1;
   y1Pos = y1;

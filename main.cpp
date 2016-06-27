@@ -11,17 +11,41 @@
 #include <stdlib.h>
 #include <time.h>
 #include "classes.h"
-#include <cmath>
 
 void outputTest();
 bool validateDirection(int dir, int len);
-void makeNewThings(int x, int y, int dir);
+void addMazePiece(int x, int y, int dir);
+void genMazeSet();
 
-std::vector<makeThings> classSet(1,makeThings(0,0,0,10, _UP));
+std::vector<mazePiece> classSet(1,mazePiece(0,0,0,10, _UP));
+unsigned int totalPiecesNum = 0;
+
+//For debug purposes.
+int mazesGenerated = 0;
 
 int main()
 {
-  classSet.reserve(50);
+  do {
+    genMazeSet();
+    totalPiecesNum = classSet.size();
+    mazesGenerated++;
+
+    std::cout << "Maze Number: " << mazesGenerated << std::endl
+              << "***************" << std::endl;
+    outputTest();
+    if((totalPiecesNum < MIN_PIECES) || (totalPiecesNum > MAX_PIECES))
+    { classSet.erase(classSet.begin() + 1,classSet.end()); totalPiecesNum = 1; }
+  } while((totalPiecesNum < MIN_PIECES) || (totalPiecesNum > MAX_PIECES));
+
+
+  std::cin.get();
+
+  return 0;
+}
+
+void genMazeSet()
+{
+  classSet.reserve(MAX_PIECES);
     int newX = classSet[0].getX2Pos();
     int newY = classSet[0].getY2Pos();
     int newDirection = _DOWN;
@@ -29,44 +53,46 @@ int main()
 
   srand(time(NULL));
   //Create and assign vals for new classes within the vector.
-  for(unsigned int i = 1; i < 50; i++)
-  {
+  for(unsigned int i = 1; i < 50; i++) {
     //Gen new direction randomly.
     newDirection = rand() % 4 + 1;
-
     //Create the new X2 and Y2 positions based on the new direction.
     if(validateDirection(newDirection, lineLength)) {
       switch(newDirection) {
         case _UP: {
             newY += lineLength;
-            makeNewThings(classSet[classSet.size()-1].getX2Pos(), newY, newDirection);
+            addMazePiece(classSet[classSet.size()-1].getX2Pos(), newY, newDirection);
            break; }
         case _DOWN: {
             newY -= lineLength;
-            makeNewThings(classSet[classSet.size()-1].getX2Pos(), newY, newDirection);
+            addMazePiece(classSet[classSet.size()-1].getX2Pos(), newY, newDirection);
             break;  }
         case _RIGHT: {
             newX += lineLength;
-            makeNewThings(newX, classSet[classSet.size()-1].getY2Pos(), newDirection);
+            addMazePiece(newX, classSet[classSet.size()-1].getY2Pos(), newDirection);
             break;   }
         case _LEFT:  {
             newX -= lineLength;
-            makeNewThings(newX, classSet[classSet.size()-1].getY2Pos(), newDirection);
+            addMazePiece(newX, classSet[classSet.size()-1].getY2Pos(), newDirection);
             break;   }
       }
     }
   }
-  outputTest();
-  return 0;
+
 }
-  void makeNewThings(int x, int y, int dir) {
-    //Generates new coords based on the prior vector positions,
-      // and new X/Y positions generated.
-      makeThings newThing(classSet[classSet.size()-1].getX2Pos(),
-                          classSet[classSet.size()-1].getY2Pos(),
-                          x, y, dir);
-      classSet.push_back(newThing);
-  }
+
+void addMazePiece(int x, int y, int dir) {
+  //Generates new coords based on the prior vector positions,
+    // and new X/Y positions generated.
+    mazePiece newPiece(classSet[classSet.size()-1].getX2Pos(),
+                        classSet[classSet.size()-1].getY2Pos(),
+                        x, y, dir);
+    //In cases where we made mazes with less than MIN_PIECES elements,
+    // we must assign the class directly instead of pushing the class
+    // to the vector like normal.
+
+    classSet.push_back(newPiece);
+}
 
 bool validateDirection(int dir, int len)
 {
@@ -121,12 +147,10 @@ void outputTest() {
   for(unsigned int i = 0; i < classSet.size(); i++) {
     std::cout << "i: " << i << std::endl
               << "X1: " << classSet[i].getX1Pos()
-              << " Y1: " << classSet[i].getY1Pos() << std::endl
-              << "X2: " << classSet[i].getX2Pos()
+              << " Y1: " << classSet[i].getY1Pos()
+              << " X2: " << classSet[i].getX2Pos()
               << " Y2: " << classSet[i].getY2Pos() << std::endl
               << "Direction: " << classSet[i].getDirection() << std::endl << std::endl;
   }
    std::cin.get();
 }
-
-
