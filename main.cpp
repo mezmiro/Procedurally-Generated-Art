@@ -1,8 +1,9 @@
-/********************************************************************
-*Vector Testing
-*-Just some training so we can dev a few algorithms later,
-* as I forgot how to work with these nifty things.
-*********************************************************************/
+/***************************************************************************
+*Random Map Generation
+* -Made for the _HappieCat game dev challenge for procedurally generated art.
+* -Code structure is iffy at the moment, as it's kind of slapped together
+*   for now.
+****************************************************************************/
 
 #include <iostream>
 #include <string>
@@ -13,15 +14,9 @@
 #include <cmath>
 
 void outputTest();
-void makeNewThings(int i, int x, int y, int dir);
+bool validateDirection(int dir, int len);
+void makeNewThings(int x, int y, int dir);
 
-//Create 10 ints. Is there a default value?
-//If supplied, the 2nd arg sets the default value.
-//Ints are zero if unsupplied. The default ctor is called
-// when making a vector of classes.
-std::vector<int> test(10,5);
-//Non-specified size.
-std::vector<int> test1;
 std::vector<makeThings> classSet(1,makeThings(0,0,0,10, _UP));
 
 int main()
@@ -34,56 +29,92 @@ int main()
 
   srand(time(NULL));
   //Create and assign vals for new classes within the vector.
-  for(unsigned int i = 1; i < 30; i++)
+  for(unsigned int i = 1; i < 50; i++)
   {
     //Gen new direction randomly.
     newDirection = rand() % 4 + 1;
 
     //Create the new X2 and Y2 positions based on the new direction.
-    if(abs(classSet[i-1].getDirection()-classSet[i].getDirection()) != 1) {
+    if(validateDirection(newDirection, lineLength)) {
       switch(newDirection) {
         case _UP: {
-          if((classSet[i-1].getY2Pos() + lineLength) < SCREEN_MAX_Y)
-          {
-            newY = classSet[i-1].getY2Pos() + lineLength;
-            makeNewThings(i, classSet[i-1].getX2Pos(),newY,newDirection);
-          } break;
-        } ,,,f6
+            newY += lineLength;
+            makeNewThings(classSet[classSet.size()-1].getX2Pos(), newY, newDirection);
+           break; }
         case _DOWN: {
-          if((classSet[i-1].getY2Pos() - lineLength) > SCREEN_MIN_Y)
-          {
-            newY = classSet[i-1].getY2Pos() - lineLength;
-            makeNewThings(i, classSet[i-1].getX2Pos(),newY,newDirection);
-          } break;
-        }
+            newY -= lineLength;
+            makeNewThings(classSet[classSet.size()-1].getX2Pos(), newY, newDirection);
+            break;  }
         case _RIGHT: {
-          if((classSet[i-1].getX2Pos() + lineLength) < SCREEN_MAX_X)
-          {
-            newX = classSet[i-1].getX2Pos() + lineLength;
-            makeNewThings(i, newX,classSet[i-1].getY2Pos(),newDirection);
-          } break;
-        }
+            newX += lineLength;
+            makeNewThings(newX, classSet[classSet.size()-1].getY2Pos(), newDirection);
+            break;   }
         case _LEFT:  {
-          if((classSet[i-1].getX2Pos() - lineLength) > SCREEN_MIN_X)
-          {
-            newX = classSet[i-1].getX2Pos() - lineLength;
-            makeNewThings(i, newX,classSet[i-1].getY2Pos(),newDirection);
-          } break;
-        }
+            newX -= lineLength;
+            makeNewThings(newX, classSet[classSet.size()-1].getY2Pos(), newDirection);
+            break;   }
       }
     }
   }
   outputTest();
   return 0;
 }
-  void makeNewThings(int i, int x, int y, int dir) {
+  void makeNewThings(int x, int y, int dir) {
     //Generates new coords based on the prior vector positions,
       // and new X/Y positions generated.
-      makeThings newThing(classSet[i].getX2Pos(),
-                          classSet[i].getY2Pos(),
+      makeThings newThing(classSet[classSet.size()-1].getX2Pos(),
+                          classSet[classSet.size()-1].getY2Pos(),
                           x, y, dir);
       classSet.push_back(newThing);
   }
+
+bool validateDirection(int dir, int len)
+{
+  //Check if the new line will be within our screen boundaries.
+  switch(dir) {
+   case _UP:   {
+     if(classSet.back().getY2Pos() + len > SCREEN_MAX_Y)
+     { return false; }
+     else {
+        for(unsigned int i = classSet.size(); i > 0; i--) {
+           if(((classSet.back().getX2Pos())       == classSet[i-1].getX1Pos()) &&
+               (classSet.back().getY2Pos() + len) == classSet[i-1].getY1Pos())
+           { return false; }
+        }
+     } break; }
+   case _DOWN: {
+     if(classSet.back().getY2Pos() - len < SCREEN_MIN_Y)
+     { return false; }
+     else {
+        for(unsigned int i = classSet.size(); i > 0; i--) {
+           if(((classSet.back().getX2Pos())     == classSet[i-1].getX1Pos()) &&
+               (classSet.back().getY2Pos()-len) == classSet[i-1].getY1Pos())
+           { return false; }
+        }
+     } break; }
+   case _LEFT: {
+     if(classSet.back().getX2Pos() - len < SCREEN_MIN_X)
+     { return false; }
+     else {
+        for(unsigned int i = classSet.size(); i > 0; i--) {
+           if(((classSet.back().getX2Pos() - len) == classSet[i-1].getX1Pos()) &&
+               (classSet.back().getY2Pos())       == classSet[i-1].getY1Pos())
+           { return false; }
+        }
+     } break; }
+   case _RIGHT: {
+     if(classSet[classSet.size()].getX2Pos() + len > SCREEN_MAX_X)
+     { return false; }
+     else {
+        for(unsigned int i = classSet.size(); i > 0; i--) {
+           if(((classSet.back().getX2Pos() + len)  == classSet[i-1].getX1Pos()) &&
+               (classSet.back().getY2Pos())        == classSet[i-1].getY1Pos())
+           { return false; }
+        }
+     } break;  }
+  }
+  return true;
+}
 
 void outputTest() {
   //Output for testing.
