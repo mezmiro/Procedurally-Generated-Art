@@ -5,11 +5,7 @@
 *   for now.
 ****************************************************************************/
 
-#include <iostream>
-#include <string>
-#include <vector>
-#include <stdlib.h>
-#include <time.h>
+
 #include "classes.h"
 
 void outputTest();
@@ -20,24 +16,17 @@ void genMazeSet();
 std::vector<mazePiece> classSet(1,mazePiece(0,0,0,10, _UP));
 unsigned int totalPiecesNum = 0;
 
-//For debug purposes.
-int mazesGenerated = 0;
-
 int main()
 {
   do {
     genMazeSet();
     totalPiecesNum = classSet.size();
-    mazesGenerated++;
 
-    std::cout << "Maze Number: " << mazesGenerated << std::endl
-              << "***************" << std::endl;
-    outputTest();
     if((totalPiecesNum < MIN_PIECES) || (totalPiecesNum > MAX_PIECES))
     { classSet.erase(classSet.begin() + 1,classSet.end()); totalPiecesNum = 1; }
   } while((totalPiecesNum < MIN_PIECES) || (totalPiecesNum > MAX_PIECES));
 
-
+  outputTest();
   std::cin.get();
 
   return 0;
