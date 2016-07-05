@@ -5,141 +5,113 @@
 *   for now.
 ****************************************************************************/
 
-
 #include "classes.h"
+#include "sprite.h"
+#include "maze.h"
+#include "terrain.h"
+#include "enemy.h"
+#include "player.h"
+#include "level.h"
+#include "game.h"
 
-void outputTest();
-bool validateDirection(int dir, int len);
-void addMazePiece(int x, int y, int dir);
-void genMazeSet();
+void makeTheStuff();
 
-std::vector<mazePiece> classSet(1,mazePiece(0,0,0,10, _UP));
+unsigned int gameState = 1;
 unsigned int totalPiecesNum = 0;
 
 int main()
 {
-  do {
-    genMazeSet();
-    totalPiecesNum = classSet.size();
+  CGame Game;
 
-    if((totalPiecesNum < MIN_PIECES) || (totalPiecesNum > MAX_PIECES))
-    { classSet.erase(classSet.begin() + 1,classSet.end()); totalPiecesNum = 1; }
-  } while((totalPiecesNum < MIN_PIECES) || (totalPiecesNum > MAX_PIECES));
+  while(gameState != EXIT_STATE)
+  {
+    switch(gameState) {
+    case INTRO_STATE: {
+      //Random thought - Can we/do games load resources while the "intro movie/cinematic" is playing?
+      //Like in a separate thread.. hmm.
 
-  outputTest();
-  std::cin.get();
-
-  return 0;
-}
-
-void genMazeSet()
-{
-  classSet.reserve(MAX_PIECES);
-    int newX = classSet[0].getX2Pos();
-    int newY = classSet[0].getY2Pos();
-    int newDirection = _DOWN;
-    int lineLength = 10;
-
-  srand(time(NULL));
-  //Create and assign vals for new classes within the vector.
-  for(unsigned int i = 1; i < 50; i++) {
-    //Gen new direction randomly.
-    newDirection = rand() % 4 + 1;
-    //Create the new X2 and Y2 positions based on the new direction.
-    if(validateDirection(newDirection, lineLength)) {
-      switch(newDirection) {
-        case _UP: {
-            newY += lineLength;
-            addMazePiece(classSet[classSet.size()-1].getX2Pos(), newY, newDirection);
-           break; }
-        case _DOWN: {
-            newY -= lineLength;
-            addMazePiece(classSet[classSet.size()-1].getX2Pos(), newY, newDirection);
-            break;  }
-        case _RIGHT: {
-            newX += lineLength;
-            addMazePiece(newX, classSet[classSet.size()-1].getY2Pos(), newDirection);
-            break;   }
-        case _LEFT:  {
-            newX -= lineLength;
-            addMazePiece(newX, classSet[classSet.size()-1].getY2Pos(), newDirection);
-            break;   }
-      }
+      break;
     }
+    case PLAY_STATE: {
+      switch(Game.getLevelNum() - 1) {
+        case 0: {
+          /*****************************************/
+          //                 Level 1 Flow
+          /*****************************************/
+          //Prepare necessary values/assets.
+          //Gen maze coords, maze sprite types(hall,corner,rotation).
+          //Gen terrain types, positions.
+          do {
+            Game.Levels[0].Maze.genMazeSet() ;
+            totalPiecesNum = Game.Levels[0].Maze.getMazeSize();
+
+            if((totalPiecesNum < Game.Levels[0].Maze.getMinMazeSize()) || (totalPiecesNum > Game.Levels[0].Maze.getMaxMazeSize()))
+            {
+              Game.Levels[0].Maze.clearMazePieces();
+              totalPiecesNum = 1;
+            }
+          } while((totalPiecesNum < Game.Levels[0].Maze.getMinMazeSize()) || (totalPiecesNum > Game.Levels[0].Maze.getMaxMazeSize()));
+
+
+            //Check if the player beat this level, and go to the next.
+            if(Game.Levels[Game.getLevelNum() -1].getComplete())
+            { Game.addLevel(51, 70, 0, 0, 10, 10, _UP); }
+          //Level 1 rendering / gameplay.
+
+          //Check if the player beat this level, and go to the next.
+          if(Game.Levels[Game.getLevelNum() -1].getComplete())
+          { Game.addLevel(31, 50, 0, 0, 10, 10, _UP); }
+
+          //Reset the game state for development, as we are still making most of this.
+          gameState = 4;
+          break;
+        }
+        case 1:  {
+          /*****************************************/
+          //                 Level 2 Flow
+          /*****************************************/
+          //Prepare necessary values/assets.
+          //Gen maze coords, maze sprite types(hall,corner,rotation).
+          //Gen terrain types, positions.
+          //Level 2 rendering / gameplay.
+
+
+
+          break;
+        }
+        case 2:  {
+          /*****************************************/
+          //                 Level 3 Flow
+          /*****************************************/
+          //Prepare necessary values/assets.
+          //Gen maze coords, maze sprite types(hall,corner,rotation).
+          //Gen terrain types, positions.
+
+          //Level 3 rendering / gameplay.
+
+          //Check if the player won.
+          if(Game.Levels[Game.getLevelNum() -1].getComplete())
+          {  gameState = YOU_WIN_STATE; }
+          break;
+          }
+      } } }
   }
+  //Generate the maze coord set.
+  //Game.Levels[0].Maze.genMazeSet() ;
+  do {
+    Game.Levels[0].Maze.genMazeSet() ;
+    //Game.genMazeSet();
+    totalPiecesNum = Game.Levels[0].Maze.getMazeSize();
 
-}
+    if((totalPiecesNum < Game.Levels[0].Maze.getMinMazeSize()) || (totalPiecesNum > Game.Levels[0].Maze.getMaxMazeSize()))
+    {
+      Game.Levels[0].Maze.clearMazePieces();
+      totalPiecesNum = 1;
+    }
+  } while((totalPiecesNum < Game.Levels[0].Maze.getMinMazeSize()) || (totalPiecesNum > Game.Levels[0].Maze.getMaxMazeSize()));
 
-void addMazePiece(int x, int y, int dir) {
-  //Generates new coords based on the prior vector positions,
-    // and new X/Y positions generated.
-    mazePiece newPiece(classSet[classSet.size()-1].getX2Pos(),
-                        classSet[classSet.size()-1].getY2Pos(),
-                        x, y, dir);
-    //In cases where we made mazes with less than MIN_PIECES elements,
-    // we must assign the class directly instead of pushing the class
-    // to the vector like normal.
+  Game.Levels[0].Maze.outputTest();
 
-    classSet.push_back(newPiece);
-}
-
-bool validateDirection(int dir, int len)
-{
-  //Check if the new line will be within our screen boundaries.
-  switch(dir) {
-   case _UP:   {
-     if(classSet.back().getY2Pos() + len > SCREEN_MAX_Y)
-     { return false; }
-     else {
-        for(unsigned int i = classSet.size(); i > 0; i--) {
-           if(((classSet.back().getX2Pos())       == classSet[i-1].getX1Pos()) &&
-               (classSet.back().getY2Pos() + len) == classSet[i-1].getY1Pos())
-           { return false; }
-        }
-     } break; }
-   case _DOWN: {
-     if(classSet.back().getY2Pos() - len < SCREEN_MIN_Y)
-     { return false; }
-     else {
-        for(unsigned int i = classSet.size(); i > 0; i--) {
-           if(((classSet.back().getX2Pos())     == classSet[i-1].getX1Pos()) &&
-               (classSet.back().getY2Pos()-len) == classSet[i-1].getY1Pos())
-           { return false; }
-        }
-     } break; }
-   case _LEFT: {
-     if(classSet.back().getX2Pos() - len < SCREEN_MIN_X)
-     { return false; }
-     else {
-        for(unsigned int i = classSet.size(); i > 0; i--) {
-           if(((classSet.back().getX2Pos() - len) == classSet[i-1].getX1Pos()) &&
-               (classSet.back().getY2Pos())       == classSet[i-1].getY1Pos())
-           { return false; }
-        }
-     } break; }
-   case _RIGHT: {
-     if(classSet[classSet.size()].getX2Pos() + len > SCREEN_MAX_X)
-     { return false; }
-     else {
-        for(unsigned int i = classSet.size(); i > 0; i--) {
-           if(((classSet.back().getX2Pos() + len)  == classSet[i-1].getX1Pos()) &&
-               (classSet.back().getY2Pos())        == classSet[i-1].getY1Pos())
-           { return false; }
-        }
-     } break;  }
-  }
-  return true;
-}
-
-void outputTest() {
-  //Output for testing.
-  for(unsigned int i = 0; i < classSet.size(); i++) {
-    std::cout << "i: " << i << std::endl
-              << "X1: " << classSet[i].getX1Pos()
-              << " Y1: " << classSet[i].getY1Pos()
-              << " X2: " << classSet[i].getX2Pos()
-              << " Y2: " << classSet[i].getY2Pos() << std::endl
-              << "Direction: " << classSet[i].getDirection() << std::endl << std::endl;
-  }
-   std::cin.get();
+    std::cin.get();
+  return 0;
 }
